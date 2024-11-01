@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>br.com.baba</groupId>
-    <artifactId>api-produtct</artifactId>
+    <artifactId>api-product</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Product Control</name>
     <description>Project to control products</description>
