@@ -5,6 +5,7 @@ import br.com.baba.api_produtct.api.dto.ProductFormDTO;
 import br.com.baba.api_produtct.api.dto.ProductUpdateDTO;
 import br.com.baba.api_produtct.api.model.Product;
 import br.com.baba.api_produtct.api.service.ProductService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/product")
+@SecurityRequirement(name = "bearer-key")
 public class ProductController {
 
     @Autowired
@@ -36,7 +38,7 @@ public class ProductController {
         return ResponseEntity.ok().body(products.map(m -> new ProductDetailDTO(m)).stream().collect(Collectors.toList()));
     }
 
-    @PostMapping()
+    @PostMapping
     @Transactional
     public ResponseEntity createProduct(@Valid @RequestBody ProductFormDTO productFormDTO, UriComponentsBuilder uriBuilder) {
         var product = productService.createProduct(productFormDTO);
