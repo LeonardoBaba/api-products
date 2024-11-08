@@ -3,15 +3,20 @@ package br.com.baba.api_produtct.api.service;
 import br.com.baba.api_produtct.api.dto.UserFormDTO;
 import br.com.baba.api_produtct.api.dto.UserUpdateDTO;
 import br.com.baba.api_produtct.api.enums.RoleEnum;
+import br.com.baba.api_produtct.api.exception.NotFoundException;
 import br.com.baba.api_produtct.api.model.User;
 import br.com.baba.api_produtct.api.repository.UserRepository;
 import br.com.baba.api_produtct.api.security.SecurityConfigurations;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
@@ -67,12 +72,22 @@ public class UserServiceTest {
         Long userId = 1L;
         User user = new User();
         user.setId(userId);
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         User foundUser = userService.getUserById(userId);
 
         assertNotNull(foundUser);
         assertEquals(userId, foundUser.getId());
+    }
+
+    @Test
+    void shouldThrowNotFoundException() {
+        Long userId = 1L;
+        User user = new User();
+        user.setId(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> userService.getUserById(userId));
     }
 
     @Test
@@ -84,7 +99,7 @@ public class UserServiceTest {
         user.setName("oldName");
         user.setEmail("oldEmail");
         user.setRole(RoleEnum.MANAGER);
-        when(userRepository.getReferenceById(userId)).thenReturn(user);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         User updatedUser = userService.updateUser(userUpdateDTO);
 

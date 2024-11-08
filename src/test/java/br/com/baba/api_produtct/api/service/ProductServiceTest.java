@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.then;
@@ -110,13 +111,13 @@ class ProductServiceTest {
         Product mockProduct = new Product();
         mockProduct.setId(productId);
 
-        when(productRepository.getReferenceById(productId)).thenReturn(mockProduct);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(mockProduct));
 
         Product result = productService.findById(productId);
 
         assertNotNull(result);
         assertEquals(productId, result.getId());
-        verify(productRepository, times(1)).getReferenceById(productId);
+        verify(productRepository, times(1)).findById(productId);
     }
 
     @Test
@@ -129,13 +130,13 @@ class ProductServiceTest {
         product.setId(productId);
         product.setPrice(BigDecimal.valueOf(50.00));
 
-        when(productRepository.getReferenceById(productId)).thenReturn(product);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         Product updatedProduct = productService.updateProduct(updateDTO);
 
         assertNotNull(updatedProduct);
         assertEquals(newPrice, updatedProduct.getPrice());
-        verify(productRepository, times(1)).getReferenceById(productId);
+        verify(productRepository, times(1)).findById(productId);
     }
 
     @Test
@@ -148,13 +149,13 @@ class ProductServiceTest {
         product.setId(productId);
         product.setPrice(BigDecimal.valueOf(50.00));
 
-        when(productRepository.getReferenceById(productId)).thenReturn(product);
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         Product updatedProduct = productService.updateProduct(updateDTO);
 
         assertNotNull(updatedProduct);
         assertEquals(BigDecimal.valueOf(50.00), updatedProduct.getPrice());
-        verify(productRepository, times(1)).getReferenceById(productId);
+        verify(productRepository, times(1)).findById(productId);
     }
 
 }

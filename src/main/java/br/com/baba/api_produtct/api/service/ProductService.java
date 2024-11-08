@@ -2,6 +2,7 @@ package br.com.baba.api_produtct.api.service;
 
 import br.com.baba.api_produtct.api.dto.ProductFormDTO;
 import br.com.baba.api_produtct.api.dto.ProductUpdateDTO;
+import br.com.baba.api_produtct.api.exception.NotFoundException;
 import br.com.baba.api_produtct.api.model.Product;
 import br.com.baba.api_produtct.api.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class ProductService {
     private ProductRepository productRepository;
 
     public Product updateProduct(ProductUpdateDTO productUpdateDTO) {
-        var product = productRepository.getReferenceById(productUpdateDTO.id());
+        var product = findById(productUpdateDTO.id());
         if (productUpdateDTO.price().compareTo(BigDecimal.ZERO) > 0) {
             product.setPrice(productUpdateDTO.price());
         }
@@ -26,7 +27,8 @@ public class ProductService {
     }
 
     public Product findById(Long id) {
-        return productRepository.getReferenceById(id);
+        return productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Product %d not found.", id)));
     }
 
     public Page<Product> findAll(Pageable pageable) {
