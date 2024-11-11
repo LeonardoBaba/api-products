@@ -4,6 +4,7 @@ import br.com.baba.api_produtct.api.dto.ErrorResponseDTO;
 import br.com.baba.api_produtct.api.dto.FieldErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +32,11 @@ public class ProjectExceptionHandler {
     public ResponseEntity handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         var errors = e.getFieldErrors();
         return ResponseEntity.badRequest().body(errors.stream().map(FieldErrorDTO::new).toList());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity handleAccessDeniedException(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
 }
