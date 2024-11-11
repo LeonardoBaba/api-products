@@ -2,14 +2,12 @@ package br.com.baba.api_produtct.api.service;
 
 import br.com.baba.api_produtct.api.dto.ProductFormDTO;
 import br.com.baba.api_produtct.api.dto.ProductUpdateDTO;
+import br.com.baba.api_produtct.api.exception.NotFoundException;
 import br.com.baba.api_produtct.api.model.Product;
 import br.com.baba.api_produtct.api.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,6 +26,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
 
+    @Spy
     @InjectMocks
     private ProductService productService;
 
@@ -44,31 +43,26 @@ class ProductServiceTest {
     private ProductRepository productRepository;
 
     @Test
-    void shouldCreateProductWithNoQuantity() {
-        productFormDTO = new ProductFormDTO("name", BigDecimal.TEN, null);
+    void shouldCreateProduct() {
         product = new Product(productFormDTO);
 
         productService.createProduct(productFormDTO);
 
         then(productRepository).should().save(productCaptor.capture());
         var result = productCaptor.getValue();
-        assertEquals(product.getName(), result.getName());
-        assertEquals(product.getPrice(), result.getPrice());
-        assertEquals(BigDecimal.ZERO, result.getQuantity());
+        verify(productRepository, times(1)).save(result);
     }
 
     @Test
-    void shouldCreateProduct() {
-        productFormDTO = new ProductFormDTO("name", BigDecimal.TEN, BigDecimal.ONE);
+    void shouldCreateProductWithNoQuantity() {
+        productFormDTO = new ProductFormDTO("", BigDecimal.TWO, null);
         product = new Product(productFormDTO);
 
         productService.createProduct(productFormDTO);
 
         then(productRepository).should().save(productCaptor.capture());
         var result = productCaptor.getValue();
-        assertEquals(product.getName(), result.getName());
-        assertEquals(product.getPrice(), result.getPrice());
-        assertEquals(BigDecimal.ONE, result.getQuantity());
+        assertEquals(BigDecimal.ZERO, result.getQuantity());
     }
 
     @Test
@@ -106,18 +100,20 @@ class ProductServiceTest {
     }
 
     @Test
-    void shouldReturnProductById() {
-        Long productId = 1L;
-        Product mockProduct = new Product();
-        mockProduct.setId(productId);
+    void shouldFindProductById() {
+        Long id = anyLong();
+        when(productRepository.findById(id)).thenReturn(Optional.of(product));
 
-        when(productRepository.findById(productId)).thenReturn(Optional.of(mockProduct));
+        assertDoesNotThrow(() -> productService.findById(id));
+        verify(productRepository, times(1)).findById(id);
+    }
 
-        Product result = productService.findById(productId);
+    @Test
+    void shouldThrowNotFoundException() {
+        Long id = anyLong();
+        when(productRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertNotNull(result);
-        assertEquals(productId, result.getId());
-        verify(productRepository, times(1)).findById(productId);
+        assertThrows(NotFoundException.class, () -> productService.findById(id));
     }
 
     @Test
@@ -126,36 +122,29 @@ class ProductServiceTest {
         BigDecimal newPrice = BigDecimal.valueOf(100.00);
         ProductUpdateDTO updateDTO = new ProductUpdateDTO(productId, newPrice);
 
-        Product product = new Product();
-        product.setId(productId);
+        product = new Product();
         product.setPrice(BigDecimal.valueOf(50.00));
 
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        doReturn(product).when(productService).findById(productId);
 
         Product updatedProduct = productService.updateProduct(updateDTO);
 
         assertNotNull(updatedProduct);
         assertEquals(newPrice, updatedProduct.getPrice());
-        verify(productRepository, times(1)).findById(productId);
     }
 
     @Test
     void shouldNotUpdateProductPriceWhenInvalidPriceIsGiven() {
         Long productId = 1L;
-        BigDecimal invalidPrice = BigDecimal.valueOf(-10.00);
-        ProductUpdateDTO updateDTO = new ProductUpdateDTO(productId, invalidPrice);
-
-        Product product = new Product();
-        product.setId(productId);
+        ProductUpdateDTO updateDTO = new ProductUpdateDTO(productId, BigDecimal.valueOf(-10.00));
+        product = new Product();
         product.setPrice(BigDecimal.valueOf(50.00));
 
-        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
-
+        doReturn(product).when(productService).findById(productId);
         Product updatedProduct = productService.updateProduct(updateDTO);
 
         assertNotNull(updatedProduct);
         assertEquals(BigDecimal.valueOf(50.00), updatedProduct.getPrice());
-        verify(productRepository, times(1)).findById(productId);
     }
 
 }

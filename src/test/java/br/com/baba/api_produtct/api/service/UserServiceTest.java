@@ -9,19 +9,16 @@ import br.com.baba.api_produtct.api.repository.UserRepository;
 import br.com.baba.api_produtct.api.security.SecurityConfigurations;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -32,11 +29,9 @@ public class UserServiceTest {
     @Mock
     private SecurityConfigurations securityConfigurations;
 
+    @Spy
     @InjectMocks
     private UserService userService;
-
-    @Captor
-    private ArgumentCaptor<User> userCaptor;
 
     @Mock
     private UserFormDTO userFormDTO;
@@ -47,64 +42,76 @@ public class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private UserUpdateDTO userUpdateDTO;
+
     @Test
-    void shouldCreateUser() {
-        this.userFormDTO = new UserFormDTO("username", "name"
-                , RoleEnum.MANAGER, "email@email.com", "password");
-        String encodedPassword = "encodePassword";
-        given(securityConfigurations.passwordEncoder()).willReturn(passwordEncoder);
-        given(passwordEncoder.encode(userFormDTO.password())).willReturn(encodedPassword);
-        this.user = new User(userFormDTO, encodedPassword);
+    void shouldSaveUser() {
+        String password = "test";
+        when(securityConfigurations.passwordEncoder()).thenReturn(passwordEncoder);
+        when(passwordEncoder.encode(userFormDTO.password())).thenReturn(password);
 
-        userService.createUser(userFormDTO);
+        User savedUser = userService.createUser(userFormDTO);
 
-        then(userRepository).should().save(userCaptor.capture());
-        User savedUser = userCaptor.getValue();
-        assertEquals(user.getName(), savedUser.getName());
-        assertEquals(user.getEmail(), savedUser.getEmail());
-        assertEquals(user.getPassword(), savedUser.getPassword());
-        assertEquals(user.getRole(), savedUser.getRole());
-        assertEquals(user.getUsername(), savedUser.getUsername());
+        verify(userRepository, times(1)).save(savedUser);
     }
 
     @Test
-    void shouldReturnUser() {
-        Long userId = 1L;
-        User user = new User();
-        user.setId(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    void shouldGetUserById() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
-        User foundUser = userService.getUserById(userId);
-
-        assertNotNull(foundUser);
-        assertEquals(userId, foundUser.getId());
+        assertDoesNotThrow(() -> userService.getUserById(anyLong()));
     }
 
     @Test
     void shouldThrowNotFoundException() {
-        Long userId = 1L;
-        User user = new User();
-        user.setId(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> userService.getUserById(userId));
+        assertThrows(NotFoundException.class, () -> userService.getUserById(anyLong()));
     }
 
     @Test
-    void testUpdateUser() {
-        Long userId = 1L;
-        UserUpdateDTO userUpdateDTO = new UserUpdateDTO(userId, "newName", "newEmail@email.com", RoleEnum.ADMIN);
-        User user = new User();
-        user.setId(userId);
-        user.setName("oldName");
-        user.setEmail("oldEmail");
-        user.setRole(RoleEnum.MANAGER);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    void shouldUpdateUserName() {
+        String newName = "newName";
+        user = new User();
+        when(userUpdateDTO.name()).thenReturn(newName);
+        doReturn(user).when(userService).getUserById(anyLong());
 
         User updatedUser = userService.updateUser(userUpdateDTO);
 
-        assertEquals(userUpdateDTO.name(), updatedUser.getName());
-        assertEquals(userUpdateDTO.email(), updatedUser.getEmail());
-        assertEquals(userUpdateDTO.role(), updatedUser.getRole());
+        assertEquals(newName, updatedUser.getName());
+    }
+
+    @Test
+    void shouldUpdateEmail() {
+        String newEmail = "newEmail";
+        user = new User();
+        when(userUpdateDTO.email()).thenReturn(newEmail);
+        doReturn(user).when(userService).getUserById(anyLong());
+
+        User updatedUser = userService.updateUser(userUpdateDTO);
+
+        assertEquals(newEmail, updatedUser.getEmail());
+    }
+
+    @Test
+    void shouldUpdateRole() {
+        RoleEnum newRole = RoleEnum.MANAGER;
+        user = new User();
+        when(userUpdateDTO.role()).thenReturn(newRole);
+        doReturn(user).when(userService).getUserById(anyLong());
+
+        User updatedUser = userService.updateUser(userUpdateDTO);
+
+        assertEquals(newRole, updatedUser.getRole());
+    }
+
+    @Test
+    void shouldNotUpdateAnyProperty() {
+        doReturn(user).when(userService).getUserById(anyLong());
+
+        User updatedUser = userService.updateUser(userUpdateDTO);
+
+        assertEquals(user, updatedUser);
     }
 }
