@@ -1,4 +1,4 @@
-package br.com.baba.api_produtct.api.security;
+package br.com.baba.api_produtct.api.configuration.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

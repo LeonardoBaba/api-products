@@ -1,11 +1,11 @@
 package br.com.baba.api_produtct.api.service;
 
+import br.com.baba.api_produtct.api.configuration.security.SecurityConfigurations;
 import br.com.baba.api_produtct.api.dto.UserFormDTO;
 import br.com.baba.api_produtct.api.dto.UserUpdateDTO;
 import br.com.baba.api_produtct.api.exception.NotFoundException;
 import br.com.baba.api_produtct.api.model.User;
 import br.com.baba.api_produtct.api.repository.UserRepository;
-import br.com.baba.api_produtct.api.security.SecurityConfigurations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

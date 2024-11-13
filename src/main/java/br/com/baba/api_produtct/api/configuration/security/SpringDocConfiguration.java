@@ -1,4 +1,4 @@
-package br.com.baba.api_produtct.api.security;
+package br.com.baba.api_produtct.api.configuration.security;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

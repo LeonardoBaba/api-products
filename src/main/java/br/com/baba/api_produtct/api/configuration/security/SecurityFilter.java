@@ -1,4 +1,4 @@
-package br.com.baba.api_produtct.api.security;
+package br.com.baba.api_produtct.api.configuration.security;
 
 import br.com.baba.api_produtct.api.repository.UserRepository;
 import jakarta.servlet.FilterChain;
