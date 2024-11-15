@@ -9,9 +9,9 @@ services:
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://db/${DB_NAME}"
-      SPRING_DATASOURCE_USERNAME: ${DB_POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD_H2}
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://db/${DATABASE_NAME}"
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD}
       SERVER_PORT: 64064
       API_SECRET_SECURITY_SECRET: ${JWT_SECRET}
     env_file:
@@ -20,9 +20,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD_H2}
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
