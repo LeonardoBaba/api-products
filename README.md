@@ -57,4 +57,9 @@ The following environment variables need to be configured:
 
 ## API Documentation
 
+- **Postman**: [here](https://www.postman.com/teste5-3339/api-product/collection/mbckj09/api-product)
+
+  A collection with all API routes and example requests.
 - **Swagger UI**: [here](http://localhost:64064/swagger-ui.html)
+
+  Available after the application is running locally via Docker or your IDE.
